@@ -14,9 +14,9 @@ class MyPlugin(Star):
     
     @filter.command("playing")
     async def helloworld(self, event: AstrMessageEvent):
-        """Query the number of online players""" # 这是 handler 的描述，将会被解析方便用户了解插件内容。建议填写。
+        """Query the number of online players"""
         
-
+        # Get the result of online players
         url = "http://localhost:7878/v2/players/list"
         token = "astrbot"
         params = {"token": token}
@@ -28,8 +28,10 @@ class MyPlugin(Star):
             data = response.json()
 
             if data["status"] == "200" and "players" in data:
-                online_players = [player for player in data["players"] if player.get("active")]
-                online_count = len(online_players)
+                online_players_data = [player for player in data["players"]]
+                #online_players_data = [player for player in data["players"] if player.get("active")]
+                online_count = len(online_players_data)
+                online_players = [player.get("nickname") for player in online_players_data]
             else:
                 print("Cannot get online player list or response format is incorrect.")
                 print("Response", data)
@@ -41,7 +43,12 @@ class MyPlugin(Star):
             print("Response:", response.text)
 
 
-        yield event.plain_result(f"服务器当前共 {online_count} 名玩家") # 发送一条纯文本消息
+        # Contruct the result
+        result = f"服务器当前在线玩家 {online_count} 名"
+        if (len(online_players) > 0):
+            result += "\n" + "玩家列表：" + ", ".join(online_players)
+
+        yield event.plain_result(result)
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
