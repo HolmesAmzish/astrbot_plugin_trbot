@@ -13,9 +13,11 @@ class MyPlugin(Star):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
     
     @filter.command("playing")
-    async def helloworld(self, event: AstrMessageEvent):
+    async def query_online_players(self, event: AstrMessageEvent):
         """Query the number of online players"""
         
+        online_count = None
+
         # Get the result of online players
         url = "http://localhost:7878/v2/players/list"
         token = "astrbot"
@@ -44,9 +46,12 @@ class MyPlugin(Star):
 
 
         # Contruct the result
-        result = f"服务器当前在线玩家 {online_count} 名"
-        if (len(online_players) > 0):
-            result += "\n" + "玩家列表：" + ", ".join(online_players)
+        if online_count:
+            result = f"服务器当前在线玩家 {online_count} 名"
+            if (len(online_players) > 0):
+                result += "\n" + "玩家列表：" + ", ".join(online_players)
+        else:
+            result = "当前服务器未开启或设置错误"
 
         yield event.plain_result(result)
 
